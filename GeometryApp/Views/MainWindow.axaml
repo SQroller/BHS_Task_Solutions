@@ -1,0 +1,192 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:GeometryApp.ViewModels"
+        x:Class="GeometryApp.Views.MainWindow"
+        Width="800"
+        Height="600"
+        Title="GeometryApp - Прямоугольник и круг"
+        mc:Ignorable="d">
+  <!--
+    Главное окно приложения.
+    Содержит:
+      - Панель управления параметрами фигуры (ComboBox, ColorPicker, Slider, TextBox)
+      - Область рисования (Canvas), где отрисовывается текущая фигура.
+  -->
+
+  <Design.DataContext>
+    <vm:MainViewModel />
+  </Design.DataContext>
+
+  <Grid RowDefinitions="Auto,*"
+        ColumnDefinitions="*">
+    <!-- Панель управления -->
+    <Border Background="#1F000000"
+            Padding="12"
+            Margin="8"
+            CornerRadius="6">
+      <StackPanel Spacing="8">
+        <!-- Выбор текущей фигуры -->
+        <StackPanel Orientation="Horizontal" Spacing="8">
+          <TextBlock Text="Фигура:" VerticalAlignment="Center" />
+          <ComboBox Width="180"
+                    ItemsSource="{Binding Shapes}"
+                    SelectedItem="{Binding SelectedShape, Mode=TwoWay}">
+            <ComboBox.ItemTemplate>
+              <DataTemplate>
+                <TextBlock Text="{Binding DisplayName}" />
+              </DataTemplate>
+            </ComboBox.ItemTemplate>
+          </ComboBox>
+        </StackPanel>
+
+        <!-- Общие свойства фигуры -->
+        <StackPanel Orientation="Horizontal" Spacing="16">
+          <StackPanel Spacing="4">
+            <TextBlock Text="Цвет фигуры:" />
+            <ColorPicker Color="{Binding SelectedShape.FillColor, Mode=TwoWay}" />
+          </StackPanel>
+
+          <StackPanel Spacing="4">
+            <TextBlock Text="Цвет текста:" />
+            <ColorPicker Color="{Binding SelectedShape.TextColor, Mode=TwoWay}" />
+          </StackPanel>
+
+          <StackPanel Spacing="4" Width="200">
+            <TextBlock Text="Текст на фигуре:" />
+            <TextBox Text="{Binding SelectedShape.Text, Mode=TwoWay}" />
+          </StackPanel>
+        </StackPanel>
+
+        <!-- Специфичные для фигур параметры -->
+        <ContentControl Content="{Binding SelectedShape}">
+          <ContentControl.DataTemplates>
+            <!-- Параметры прямоугольника -->
+            <DataTemplate DataType="vm:RectangleViewModel">
+              <StackPanel Orientation="Horizontal" Spacing="16">
+                <StackPanel Spacing="4">
+                  <TextBlock Text="Ширина:" />
+                  <Slider Minimum="20"
+                          Maximum="400"
+                          Value="{Binding Width, Mode=TwoWay}"
+                          TickFrequency="10"
+                          IsSnapToTickEnabled="False" />
+                </StackPanel>
+
+                <StackPanel Spacing="4">
+                  <TextBlock Text="Высота:" />
+                  <Slider Minimum="20"
+                          Maximum="400"
+                          Value="{Binding Height, Mode=TwoWay}"
+                          TickFrequency="10"
+                          IsSnapToTickEnabled="False" />
+                </StackPanel>
+
+                <StackPanel Spacing="4">
+                  <TextBlock Text="Поворот (градусы):" />
+                  <Slider Minimum="-180"
+                          Maximum="180"
+                          Value="{Binding RotationAngle, Mode=TwoWay}"
+                          TickFrequency="5"
+                          IsSnapToTickEnabled="False" />
+                </StackPanel>
+              </StackPanel>
+            </DataTemplate>
+
+            <!-- Параметры круга -->
+            <DataTemplate DataType="vm:CircleViewModel">
+              <StackPanel Orientation="Horizontal" Spacing="16">
+                <StackPanel Spacing="4">
+                  <TextBlock Text="Горизонтальное сжатие (ScaleX):" />
+                  <Slider Minimum="0.2"
+                          Maximum="2.0"
+                          Value="{Binding ScaleX, Mode=TwoWay}"
+                          TickFrequency="0.1"
+                          IsSnapToTickEnabled="False" />
+                </StackPanel>
+
+                <StackPanel Spacing="4">
+                  <TextBlock Text="Вертикальное сжатие (ScaleY):" />
+                  <Slider Minimum="0.2"
+                          Maximum="2.0"
+                          Value="{Binding ScaleY, Mode=TwoWay}"
+                          TickFrequency="0.1"
+                          IsSnapToTickEnabled="False" />
+                </StackPanel>
+              </StackPanel>
+            </DataTemplate>
+          </ContentControl.DataTemplates>
+        </ContentControl>
+      </StackPanel>
+    </Border>
+
+    <!-- Область рисования -->
+    <Border Grid.Row="1"
+            Margin="8"
+            CornerRadius="6"
+            BorderBrush="#40000000"
+            BorderThickness="1"
+            Background="#FF1E1E1E">
+      <Canvas>
+        <!--
+          Контент фигуры отрисовывается в Canvas через DataTemplate
+          в зависимости от типа ViewModel (Rectangle / Circle).
+        -->
+        <ContentControl Canvas.Left="200"
+                        Canvas.Top="120"
+                        Content="{Binding SelectedShape}">
+          <ContentControl.DataTemplates>
+            <!-- Прямоугольник -->
+            <DataTemplate DataType="vm:RectangleViewModel">
+              <Grid>
+                <Rectangle Width="{Binding Width}"
+                           Height="{Binding Height}"
+                           Fill="{Binding FillBrush}"
+                           Stroke="White"
+                           StrokeThickness="1">
+                  <Rectangle.RenderTransform>
+                    <RotateTransform Angle="{Binding RotationAngle}"
+                                     CenterX="{Binding Width, Converter={x:Static vm:HalfValueConverter.Instance}}"
+                                     CenterY="{Binding Height, Converter={x:Static vm:HalfValueConverter.Instance}}" />
+                  </Rectangle.RenderTransform>
+                </Rectangle>
+                <TextBlock Text="{Binding Text}"
+                           Foreground="{Binding TextBrush}"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
+                           TextAlignment="Center"
+                           Margin="4" />
+              </Grid>
+            </DataTemplate>
+
+            <!-- Круг (эллипс) -->
+            <DataTemplate DataType="vm:CircleViewModel">
+              <Grid>
+                <Ellipse Width="200"
+                         Height="200"
+                         Fill="{Binding FillBrush}"
+                         Stroke="White"
+                         StrokeThickness="1">
+                  <Ellipse.RenderTransform>
+                    <ScaleTransform ScaleX="{Binding ScaleX}"
+                                    ScaleY="{Binding ScaleY}"
+									/>
+                  </Ellipse.RenderTransform>
+                </Ellipse>
+                <TextBlock Text="{Binding Text}"
+                           Foreground="{Binding TextBrush}"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
+                           TextAlignment="Center"
+                           Margin="4" />
+              </Grid>
+            </DataTemplate>
+          </ContentControl.DataTemplates>
+        </ContentControl>
+      </Canvas>
+    </Border>
+  </Grid>
+</Window>
+
+

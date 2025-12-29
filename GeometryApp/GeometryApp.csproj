@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    Проект Avalonia UI для задания GeometryApp.
+    Используется .NET 8 как актуальная кросс‑платформенная версия.
+  -->
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>false</UseWPF>
+    <UseWindowsForms>false</UseWindowsForms>
+    <!-- Режим AOT/Trimming можно добавить позже при необходимости -->
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Базовый пакет Avalonia с контролами и шаблонами -->
+    <PackageReference Include="Avalonia" Version="11.0.10" />
+    <PackageReference Include="Avalonia.Desktop" Version="11.0.10" />
+    <!-- Тема Fluent + стили по умолчанию -->
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.0.10" />
+    <!-- Инструменты для отладки и предпросмотра -->
+    <PackageReference Include="Avalonia.Diagnostics" Version="11.0.10" Condition="'$(Configuration)'=='Debug'" />
+    <!-- ColorPicker вынесен в отдельный пакет -->
+    <PackageReference Include="Avalonia.Controls.ColorPicker" Version="11.0.10" />
+  </ItemGroup>
+</Project>
+
+
